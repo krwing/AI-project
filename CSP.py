@@ -25,6 +25,7 @@ class GraphColoringCSP:
         self.initialize_domains()
         self.adjacency_list = self.create_adjacency_list()
 
+    # Initialize the domain of each vertex with all possible colors
     def initialize_domains(self):
         for edge in self.edges:
             self.vertices.add(edge[0])
@@ -39,6 +40,7 @@ class GraphColoringCSP:
             adjacency_list[edge[1]].add(edge[0])
         return adjacency_list
 
+    # Apply the AC3 algorithm to achieve arc consistency before backtracking
     def ac3(self):
         queue = [(vertex, neighbor) for vertex in self.vertices for neighbor in self.adjacency_list[vertex]]
         while queue:
@@ -50,6 +52,7 @@ class GraphColoringCSP:
                     queue.append((neighbor, vertex1))
         return True
 
+    # Revise the domain of vertex1 considering its relation with vertex2
     def revise(self, vertex1, vertex2):
         revised = False
         for color in self.domain[vertex1]:
@@ -58,11 +61,12 @@ class GraphColoringCSP:
                 revised = True
         return revised
 
-    def select_unassigned_vertex(self, assignment): # MRV
+    # Minimum Remaining Values (MRV) heuristic
+    def select_unassigned_vertex(self, assignment):
         unassigned_vertices = [v for v in self.vertices if v not in assignment]
         return min(unassigned_vertices, key=lambda vertex: (len(self.domain[vertex]), -len(self.adjacency_list[vertex])))
 
-    def order_domain_values(self, vertex, assignment): # LCV
+    def order_domain_values(self, vertex, assignment):
         return self.domain[vertex]
 
     def is_consistent(self, vertex, color, assignment):
@@ -71,12 +75,14 @@ class GraphColoringCSP:
                 return False
         return True
 
+    # Assign a color to a vertex and update the domain of its neighbors
     def assign(self, vertex, color, assignment):
         assignment[vertex] = color
         for neighbor in self.adjacency_list[vertex]:
             if color in self.domain[neighbor]:
                 self.domain[neighbor].remove(color)
 
+    # Backtrack to find a solution to the CSP
     def backtrack(self, assignment):
         if len(assignment) == len(self.vertices):
             return assignment
@@ -98,6 +104,7 @@ class GraphColoringCSP:
 
 #Load the graph——coloring test file
 file_path = 'C:/Graduate/AI/project2/graph_coloring.txt'
+
 colors, edges = parse_input_file(file_path)
 solver = GraphColoringCSP(colors, edges)
 solution = solver.solve()
